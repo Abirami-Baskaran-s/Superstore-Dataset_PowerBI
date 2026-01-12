@@ -1,0 +1,70 @@
+📊 DAX Implementation Guide
+
+This project utilizes Data Analysis Expressions (DAX) to transform raw transactional data into actionable business intelligence. Below are the core measures developed for the Superstore Dashboard.
+1. Primary Business KPIs
+
+These measures provide the foundational metrics displayed in the executive summary.
+
+Total Sales: Aggregates gross revenue.
+ 
+Total Sales = SUM(SampleSuperstore[Sales])
+
+Total Profit: Aggregates net earnings.
+
+Total Profit = SUM(SampleSuperstore[Profit])
+
+Profit Margin: Calculates profitability percentage using the DIVIDE function to handle potential division-by-zero errors.
+
+Profit Margin = DIVIDE([Total Profit], [Total Sales]) * 100
+
+Order Count: Counts total transactions in the dataset.
+
+Order Count = COUNTROWS(SampleSuperstore)
+
+Average Order Value (AOV): Determines the mean revenue generated per order.
+
+Average Order Value = DIVIDE([Total Sales], [Order Count])
+
+2. Risk Monitoring & Advanced Analytics
+
+These measures power the "Risk Status" module, identifying financial vulnerabilities and operational red flags.
+
+Loss Making Orders: Filters the dataset to count only transactions where profit is negative.
+   
+Loss Making Orders = 
+CALCULATE(
+    COUNTROWS(SampleSuperstore),
+    SampleSuperstore[Profit] < 0
+)
+
+High Discount Risk: Identifies orders with a discount rate exceeding 60%, which often leads to margin erosion.
+
+High Discount Risk = 
+CALCULATE(
+    COUNTROWS(SampleSuperstore),
+    SampleSuperstore[Discount] > 0.6
+)
+
+Business Risk Level: A dynamic status indicator that categorizes business health based on the volume of loss-making orders.
+
+Business Risk Level = 
+SWITCH(TRUE(),
+    [Loss Making Orders] > 500, "Critical Risk",
+    [Loss Making Orders] > 200, "High Risk",
+    [Loss Making Orders] > 50, "Medium Risk",
+    "Low Risk"
+)
+
+Data Quality Score: A complex measure using Variables (VAR) to calculate the percentage of "healthy" orders (those without loss or high discount risks).
+
+    Data Quality Score = 
+    VAR TotalOrders = [Order Count]
+    VAR RiskOrders = [Loss Making Orders] + [High Discount Risk]
+    RETURN 
+    (TotalOrders - RiskOrders) / TotalOrders * 100
+
+💡 Technical Highlights
+
+Measures vs. Columns: All calculations were created as Measures to ensure they remain dynamic and responsive to user-applied filters (Slicers).
+
+Logic Optimization: Used CALCULATE and SWITCH functions to create conditional logic that provides real-time status updates, such as the Business Risk Level changing to "Low Risk" based on current data.
