@@ -1,68 +1,105 @@
-Superstore Sales & Risk Analysis Dashboard
+# Coffee Shop Sales — Power BI Interactive Dashboard
 
-Project Overview
+## Project Overview
 
-This Power BI dashboard provides a comprehensive analysis of the SampleSuperstore dataset, focusing on two primary objectives: Operational Performance and Risk Monitoring. By applying information hierarchy principles (F-Pattern and the 5-second rule), the dashboard allows stakeholders to immediately identify high-level KPIs before drilling down into regional performance and product-level risks.
-Key Features
+This project presents an interactive Power BI dashboard built from a transactional dataset of over 149,000 coffee shop sales records spanning three New York City locations. The dashboard is designed as an executive-level decision-support tool, enabling stakeholders to monitor key performance indicators, investigate revenue trends through drill-down functionality, and filter operations data in real time by store and product category.
 
-  *Executive Summary (KPIs): Instant visibility into Total Sales, Profit, and Margins.
+The work progresses from foundational data modelling and calculated columns through to advanced visualisation techniques, culminating in a production-ready dashboard with KPI tracking, target benchmarking, and cross-filtered interactivity.
 
-  *Regional Performance: Bar chart analysis identifying the West and East regions as primary revenue drivers.
+---
 
-  *Category Distribution: Pie chart breakdown showing the balance between Technology, Furniture, and Office Supplies.
+## Dataset
 
-  *Risk Management Suite: Dedicated monitoring for "Loss Making Orders" and "High Discount Risk" to protect profit margins.
+| Attribute | Detail |
+|---|---|
+| Source File | `Coffee_Shop_Sales.xlsx` |
+| Sheet | Transactions |
+| Total Records | 149,116 |
+| Date Range | January 2023 — June 2023 |
+| Store Locations | Astoria, Hell's Kitchen, Lower Manhattan |
+| Product Categories | Coffee, Tea, Bakery, Branded, Coffee Beans, Drinking Chocolate, Flavours, Loose Tea, Packaged Chocolate |
+| Columns | transaction_id, transaction_date, transaction_time, transaction_qty, store_id, store_location, product_id, unit_price, product_category, product_type, product_detail |
 
-  *Interactive Slicers: Dynamic filtering by Customer Segment (Consumer, Corporate, Home Office) and Risk Status.
+---
 
-DAX Measures & Logic
+## DAX Measures and Calculated Columns
 
-The intelligence of this dashboard is powered by custom Data Analysis Expressions (DAX). Below are the key measures implemented:
+The following calculated columns were added in Data View to support the dashboard logic.
 
-1. Primary Business KPIs
-   
- #Measure	DAX Formula	Description
+| Column | DAX Formula |
+|---|---|
+| Revenue | `[transaction_qty] * [unit_price]` |
+| Hour | `HOUR([transaction_time])` |
+| Day of Week | `FORMAT([transaction_date], "dddd")` |
+| Month Name | `FORMAT([transaction_date], "MMMM")` |
 
- #Total Sales	SUM(Sales)	Aggregates gross revenue.
- 
- #Total Profit	SUM(Profit)	Aggregates net earnings.
- 
- #Profit Margin	DIVIDE([Total Profit], [Total Sales]) * 100	Percentage of revenue converted to profit.
- 
- #Average Order Value	DIVIDE([Total Sales], [Order Count])	Average revenue generated per transaction.
+The following measures were created in Modeling View to drive the KPI cards and gauge.
 
-3. Risk & Quality Metrics
-   
- #Measure	DAX Formula / Logic	Purpose
- 
- #Loss Making Orders	CALCULATE(COUNTROWS(), Profit < 0)	Counts transactions that resulted in a financial loss.
- 
- #High Discount Risk	CALCULATE(COUNTROWS(), Discount > 0.6)	Tracks orders with dangerously high discounts (>60%).
- 
- #Business Risk Level	SWITCH(TRUE()...)	A dynamic status indicator (Low, Medium, High, Critical) based on the volume of loss-making orders.
- 
- #Data Quality Score	(Total - Risk) / Total * 100	Calculates a health percentage for the dataset.
+| Measure | DAX Formula |
+|---|---|
+| Total Revenue | `SUM([Revenue])` |
+| Transaction Count | `COUNTROWS(Transactions)` |
+| Avg Transaction Value | `[Total Revenue] / [Transaction Count]` |
+| Monthly Target | `120000` |
+| Target Variance | `[Total Revenue] - [Monthly Target]` |
 
-Design Principles Applied
+---
 
-  *F-Pattern Layout: Placed the most critical KPIs in the top-left quadrant to align with natural reading patterns.
+## Dashboard Components
 
-  *5-Second Rule: Designed the "Business Risk Level" and "Risk Status" gauge to communicate the health of the business in under five seconds.
+### KPI Cards
 
-  *Conditional Formatting: Implemented color-coded alerts (Red for loss, Green for profit) to provide immediate visual cues.
+Three summary cards sit at the top of the dashboard to give immediate visibility into operational performance without scrolling or filtering.
 
-How to Use
+The **Total Revenue KPI** card displays cumulative revenue alongside the monthly target of $120,000 per store, with a trend indicator driven by the Month Name field. The **Transaction Count** card shows the total number of completed transactions, formatted in thousands for quick scanning. The **Average Transaction Value** card reports the mean spend per visit, formatted to two decimal places with a dollar prefix.
 
-  *Filter by Segment: Use the "Segment" slicer to see how Corporate vs. Consumer trends differ.
+### Gauge Chart — Revenue vs Target
 
-  *Cross-Filtering: Click on the "West" bar in the Regional chart to update the entire dashboard for that specific territory.
+A gauge visual provides a proportional view of total revenue against a six-month aggregate target. The minimum is set to zero, the maximum to 800,000, and the target line sits at 720,000. Colour-coded zones indicate whether performance is below, approaching, or exceeding expectations.
 
-  *Risk Audit: Filter the "Business Risk Level" to "High" to identify specific sub-categories (like Tables or Supplies) that are dragging down profitability.
+### Revenue Trend — Drill-Down Line Chart
 
-Technical Stack
+A line chart plots Total Revenue across the date hierarchy created automatically by Power BI. Users can drill from monthly view down to weekly and then daily granularity by clicking the drill-down icon. This allows anomaly investigation without leaving the dashboard. The title explicitly prompts users to interact with the visual.
 
-  *Tool: Power BI Desktop
+### Slicers
 
-  *Language: DAX (Data Analysis Expressions)
+Two slicers sit in the top-right region. The **Store Location** slicer is configured in dropdown style to conserve space. The **Product Category** slicer uses list style with a "Select All" option enabled, supporting multi-select via Ctrl+Click. Both slicers drive cross-filtering across every visual on the page.
 
-  *Data Source: CSV (SampleSuperstore Dataset)
+### Revenue by Product Category — Donut Chart
+
+A donut chart displays the revenue share of each product category. Coffee leads at 38.92%, followed by Tea at 27.78%. Clicking any segment filters the remaining visuals to isolate that category's contribution across stores and time.
+
+### Revenue by Store Location — Bar Chart
+
+A horizontal clustered bar chart compares total revenue across the three locations. Custom tooltips are attached to each bar, surfacing Transaction Count and Average Transaction Value on hover. This provides context beyond the headline revenue figure without cluttering the visual itself.
+
+---
+
+## Key Findings
+
+Total revenue across the six-month period reached approximately 166.49K against a gauge target of 720K, reflecting the partial-period scope of the dataset. Hell's Kitchen recorded the highest store-level revenue, followed closely by Astoria and Lower Manhattan. Coffee and Tea together account for over two-thirds of all revenue. The average transaction value across all locations sits at $4.71.
+
+---
+
+## How to Open
+
+1. Install Power BI Desktop from the Microsoft Store or the official Power BI website.
+2. Clone or download this repository.
+3. Open the `.pbix` file in Power BI Desktop.
+4. If prompted, reconnect the data source to the local path of `Coffee_Shop_Sales.xlsx`.
+5. Interact with the slicers, drill-down controls, and cross-filters on the dashboard page.
+
+---
+
+## Tools and Technologies
+
+- **Power BI Desktop** — primary visualisation and modelling tool
+- **DAX (Data Analysis Expressions)** — measure and column logic
+- **Excel (.xlsx)** — source data format
+
+
+---
+## Contact 
+
+Linkdln : https://www.linkedin.com/in/abiramihi/
+
